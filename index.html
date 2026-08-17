@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="取名工作台">
+  <meta name="theme-color" content="#C9674F">
+  <meta name="description" content="新生儿取名工作台 - 融合八字五行、三才五格、生肖喜忌的传统取名服务">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" href="favicon.png">
+  <title>新生儿取名工作台</title>
+  <style>
+    /* ===== CSS 变量 ===== */
+    :root {
+      --coral: #C9674F;
+      --coral-light: #D97860;
+      --coral-dark: #A85240;
+      --coral-pale: #F5E0D8;
+      --coral-bg: #FAF1EC;
+      --gold: #C9A86B;
+      --gold-light: #DDB97A;
+      --ink: #2C2C2C;
+      --ink-light: #666666;
+      --ink-faint: #999999;
+      --cream: #FAF6F0;
+      --white: #FFFFFF;
+      --shadow-sm: 0 1px 3px rgba(201,103,79,.08);
+      --shadow: 0 2px 12px rgba(201,103,79,.10);
+      --shadow-lg: 0 8px 30px rgba(201,103,79,.14);
+      --radius: 22px;
+      --radius-sm: 14px;
+      --safe-t: env(safe-area-inset-top, 0px);
+      --safe-b: env(safe-area-inset-bottom, 0px);
+      --tab-h: 56px;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    html { background:#FFFFFF; -webkit-text-size-adjust:100%; }
+    body {
+      font-family: -apple-system, "PingFang SC", "Noto Sans SC", "Helvetica Neue", sans-serif;
+      color: var(--ink);
+      background: var(--cream);
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== App 容器 ===== */
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      position: relative;
+      padding-bottom: calc(var(--tab-h) + var(--safe-b));
+    }
+
+    /* ===== 顶部状态栏占位 ===== */
+    .status-bar-spacer {
+      height: var(--safe-t);
+      background: linear-gradient(180deg, var(--coral) 0%, var(--coral-light) 100%);
+    }
+
+    /* ===== 页面 ===== */
+    .page { display:none; min-height:100vh; }
+    .page.active { display:block; animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+
+    /* ===== 顶部栏 ===== */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding-top: var(--safe-t);
+      background: linear-gradient(135deg, var(--coral) 0%, var(--coral-light) 100%);
+      color: #fff;
+    }
+    .header-inner {
+      padding: 12px 20px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .header-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .header-sub {
+      font-size: 11px;
+      opacity:.75;
+      margin-top:2px;
+    }
+
+    /* ===== 内容区 ===== */
+    .content { padding: 16px 16px 24px; }
+
+    /* ===== 卡片 ===== */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--coral);
+      margin-bottom: 12px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .card-title::before {
+      content:'';
+      width:3px;
+      height:14px;
+      background: var(--coral);
+      border-radius:2px;
+    }
+
+    /* ===== 首页 ===== */
+    .hero {
+      background: linear-gradient(135deg, var(--coral) 0%, var(--coral-light) 100%);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      color:#fff;
+      margin-bottom:16px;
+      position:relative;
+      overflow:hidden;
+    }
+    .hero::after {
+      content:'';
+      position:absolute;
+      right:-30px; top:-30px;
+      width:140px; height:140px;
+      border-radius:50%;
+      background: rgba(255,255,255,.08);
+    }
+    .hero::before {
+      content:'';
+      position:absolute;
+      right:40px; bottom:-40px;
+      width:80px; height:80px;
+      border-radius:50%;
+      background: rgba(255,255,255,.06);
+    }
+    .hero-title { font-size:24px; font-weight:800; letter-spacing:2px; }
+    .hero-sub { font-size:13px; opacity:.85; margin-top:6px; }
+    .hero-badge {
+      display:inline-block;
+      background: rgba(255,255,255,.2);
+      padding:4px 12px;
+      border-radius:20px;
+      font-size:11px;
+      margin-top:12px;
+    }
+
+    /* 每日荐名 */
+    .daily-name {
+      text-align:center;
+      padding:8px 0;
+    }
+    .daily-name-chars {
+      font-size:42px;
+      font-weight:800;
+      color: var(--coral);
+      letter-spacing:8px;
+      margin:8px 0;
+      font-family: "STKaiti","KaiTi",serif;
+    }
+    .daily-name-py {
+      font-size:14px;
+      color: var(--ink-light);
+      letter-spacing:2px;
+    }
+    .daily-name-mean {
+      font-size:13px;
+      color: var(--ink-light);
+      margin-top:8px;
+      padding:0 16px;
+    }
+    .daily-refresh {
+      background: var(--coral-pale);
+      color: var(--coral);
+      border:none;
+      padding:6px 16px;
+      border-radius:16px;
+      font-size:12px;
+      margin-top:12px;
+      cursor:pointer;
+    }
+
+    /* 快捷入口 */
+    .quick-grid {
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:10px;
+    }
+    .quick-item {
+      text-align:center;
+      cursor:pointer;
+    }
+    .quick-icon {
+      width:52px; height:52px;
+      border-radius:16px;
+      background: var(--coral-pale);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:22px;
+      margin:0 auto 6px;
+      transition: transform .2s;
+    }
+    .quick-item:active .quick-icon { transform: scale(.92); }
+    .quick-label { font-size:11px; color: var(--ink-light); }
+
+    /* ===== 表单 ===== */
+    .form-group { margin-bottom:18px; }
+    .form-label {
+      font-size:13px;
+      color: var(--ink-light);
+      margin-bottom:6px;
+      display:block;
+      font-weight:500;
+    }
+    .form-label .req { color: var(--coral); }
+    .form-input, .form-select {
+      width:100%;
+      padding:12px 14px;
+      border:1.5px solid #EEE;
+      border-radius: var(--radius-sm);
+      font-size:15px;
+      background:var(--white);
+      color:var(--ink);
+      transition: border-color .2s;
+      min-width:0;
+      -webkit-appearance:none;
+      font-family: inherit;
+    }
+    .form-input:focus, .form-select:focus {
+      outline:none;
+      border-color: var(--coral);
+    }
+    .form-row { display:flex; gap:10px; }
+    .form-row > * { flex:1; }
+
+    /* 时间提示 */
+    .shichen-hint {
+      font-size:12px;
+      color: var(--gold);
+      margin-top:4px;
+      padding:4px 10px;
+      background: rgba(201,168,107,.1);
+      border-radius:8px;
+      display:inline-block;
+    }
+
+    /* 性别选择 */
+    .gender-toggle {
+      display:flex;
+      gap:8px;
+    }
+    .gender-btn {
+      flex:1;
+      padding:12px;
+      border:1.5px solid #EEE;
+      border-radius: var(--radius-sm);
+      text-align:center;
+      font-size:14px;
+      cursor:pointer;
+      transition:all .2s;
+      background:var(--white);
+    }
+    .gender-btn.active {
+      border-color: var(--coral);
+      background: var(--coral-pale);
+      color: var(--coral);
+      font-weight:600;
+    }
+
+    /* ===== 步骤条 ===== */
+    .steps {
+      display:flex;
+      justify-content:space-between;
+      margin-bottom:20px;
+      padding:0 4px;
+    }
+    .step {
+      flex:1;
+      text-align:center;
+      position:relative;
+      font-size:12px;
+      color: var(--ink-faint);
+    }
+    .step-num {
+      width:28px; height:28px;
+      border-radius:50%;
+      background:#EEE;
+      color:#fff;
+      line-height:28px;
+      margin:0 auto 6px;
+      font-size:13px;
+      font-weight:700;
+      transition:all .3s;
+    }
+    .step.active .step-num { background: var(--coral); }
+    .step.done .step-num { background: var(--gold); }
+    .step.active { color: var(--coral); font-weight:600; }
+    .step::after {
+      content:'';
+      position:absolute;
+      top:14px;
+      left:50%;
+      width:100%;
+      height:2px;
+      background:#EEE;
+      z-index:-1;
+    }
+    .step:last-child::after { display:none; }
+    .step.done::after { background: var(--gold); }
+
+    /* ===== 按钮 ===== */
+    .btn {
+      display:block;
+      width:100%;
+      padding:14px;
+      border:none;
+      border-radius: var(--radius-sm);
+      font-size:16px;
+      font-weight:600;
+      text-align:center;
+      cursor:pointer;
+      transition:all .2s;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--coral) 0%, var(--coral-light) 100%);
+      color:#fff;
+      box-shadow: 0 4px 14px rgba(201,103,79,.3);
+    }
+    .btn-primary:active { transform: scale(.98); }
+    .btn-outline {
+      background: transparent;
+      border:1.5px solid var(--coral);
+      color: var(--coral);
+    }
+    .btn-ghost {
+      background: var(--coral-pale);
+      color: var(--coral);
+    }
+
+    /* ===== 八字卡片 ===== */
+    .bazi-pillars {
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:8px;
+      text-align:center;
+    }
+    .pillar {
+      background: var(--cream);
+      border-radius: var(--radius-sm);
+      padding:12px 4px;
+    }
+    .pillar-label { font-size:11px; color: var(--ink-faint); margin-bottom:6px; }
+    .pillar-ganzhi {
+      font-size:20px;
+      font-weight:700;
+      color: var(--coral);
+      font-family: "STKaiti","KaiTi",serif;
+    }
+    .pillar-wx { font-size:10px; color: var(--gold); margin-top:4px; }
+
+    /* 五行雷达图 */
+    .wuxing-chart {
+      width:100%;
+      max-width:280px;
+      margin:0 auto;
+      display:block;
+    }
+    .wuxing-bars { margin-top:12px; }
+    .wuxing-bar-row {
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:6px;
+    }
+    .wuxing-bar-label {
+      width:24px;
+      font-size:13px;
+      font-weight:600;
+      text-align:center;
+    }
+    .wuxing-bar-track {
+      flex:1;
+      height:18px;
+      background: var(--cream);
+      border-radius:9px;
+      overflow:hidden;
+    }
+    .wuxing-bar-fill {
+      height:100%;
+      border-radius:9px;
+      transition: width .6s ease;
+    }
+    .wuxing-bar-val {
+      width:28px;
+      font-size:12px;
+      color: var(--ink-light);
+      text-align:right;
+    }
+
+    /* 喜用神标签 */
+    .favorable-tags {
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin-top:8px;
+    }
+    .wx-tag {
+      padding:4px 12px;
+      border-radius:12px;
+      font-size:12px;
+      font-weight:600;
+    }
+    .wx-tag.xi { background: rgba(120,146,98,.15); color:#5a7a4a; }
+    .wx-tag.yong { background: rgba(91,141,190,.15); color:#3a6a9a; }
+    .wx-tag.ji { background: rgba(200,85,61,.15); color: var(--coral-dark); }
+
+    /* ===== 名字卡片 ===== */
+    .name-card {
+      background:var(--white);
+      border-radius: var(--radius);
+      padding:18px;
+      margin-bottom:12px;
+      box-shadow: var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+    .name-card::before {
+      content:'';
+      position:absolute;
+      left:0; top:0; bottom:0;
+      width:4px;
+      background: linear-gradient(180deg, var(--coral), var(--gold));
+    }
+    .name-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      margin-bottom:10px;
+    }
+    .name-chars {
+      font-size:28px;
+      font-weight:800;
+      color: var(--ink);
+      font-family: "STKaiti","KaiTi",serif;
+      letter-spacing:4px;
+    }
+    .name-chars .surname-char { color: var(--coral); }
+    .name-score-badge {
+      text-align:center;
+      flex-shrink:0;
+    }
+    .name-score-val {
+      font-size:28px;
+      font-weight:800;
+      color: var(--coral);
+      line-height:1;
+    }
+    .name-score-label { font-size:10px; color: var(--ink-faint); }
+    .name-py {
+      font-size:13px;
+      color: var(--ink-light);
+      letter-spacing:1px;
+      margin-bottom:8px;
+    }
+    .name-mean {
+      font-size:13px;
+      color: var(--ink-light);
+      margin-bottom:10px;
+      line-height:1.7;
+    }
+    .name-source {
+      font-size:12px;
+      color: var(--gold);
+      margin-bottom:10px;
+      font-style:italic;
+    }
+    .name-tags {
+      display:flex;
+      flex-wrap:wrap;
+      gap:4px;
+      margin-bottom:10px;
+    }
+    .name-tag {
+      padding:2px 8px;
+      border-radius:8px;
+      font-size:11px;
+      background: var(--coral-pale);
+      color: var(--coral);
+    }
+    .name-actions {
+      display:flex;
+      gap:8px;
+      margin-top:8px;
+    }
+    .name-action-btn {
+      flex:1;
+      padding:8px;
+      border:1px solid #EEE;
+      border-radius:10px;
+      text-align:center;
+      font-size:12px;
+      color: var(--ink-light);
+      cursor:pointer;
+      background:var(--white);
+      transition:all .2s;
+    }
+    .name-action-btn:active { background: var(--cream); }
+    .name-action-btn.fav-active {
+      background: var(--coral-pale);
+      border-color: var(--coral);
+      color: var(--coral);
+    }
+
+    /* ===== 模式选择 ===== */
+    .mode-tabs {
+      display:flex;
+      gap:6px;
+      margin-bottom:16px;
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+      padding-bottom:4px;
+    }
+    .mode-tab {
+      flex-shrink:0;
+      padding:8px 14px;
+      border:1.5px solid #EEE;
+      border-radius:20px;
+      font-size:13px;
+      color: var(--ink-light);
+      cursor:pointer;
+      white-space:nowrap;
+      transition:all .2s;
+      background:var(--white);
+    }
+    .mode-tab.active {
+      border-color: var(--coral);
+      background: var(--coral);
+      color:#fff;
+    }
+
+    /* ===== 收藏 ===== */
+    .empty-state {
+      text-align:center;
+      padding:60px 20px;
+      color: var(--ink-faint);
+    }
+    .empty-state-icon { font-size:48px; margin-bottom:12px; }
+    .empty-state-text { font-size:14px; }
+
+    /* 对比表 */
+    .compare-table {
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+    }
+    .compare-table th, .compare-table td {
+      padding:10px 8px;
+      text-align:center;
+      border-bottom:1px solid #EEE;
+    }
+    .compare-table th { color: var(--coral); font-weight:600; }
+
+    /* ===== 知识库 ===== */
+    .knowledge-item {
+      padding:14px;
+      border-bottom:1px solid #EEE;
+      cursor:pointer;
+    }
+    .knowledge-item:active { background: var(--cream); }
+    .knowledge-item-title { font-size:14px; font-weight:600; color: var(--ink); }
+    .knowledge-item-desc { font-size:12px; color: var(--ink-light); margin-top:4px; }
+
+    /* 汉字查询 */
+    .char-result {
+      text-align:center;
+      padding:20px;
+    }
+    .char-display {
+      font-size:64px;
+      font-family: "STKaiti","KaiTi",serif;
+      color: var(--coral);
+      margin:8px 0;
+    }
+
+    /* ===== Tab Bar ===== */
+    .tab-bar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      height: var(--tab-h);
+      padding-bottom: var(--safe-b);
+      background: rgba(255,255,255,.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(201,103,79,.08);
+      display: flex;
+      z-index: 9999;
+    }
+    .tab-item {
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:2px;
+      color: var(--ink-faint);
+      cursor:pointer;
+      transition: color .2s;
+      padding-bottom: 4px;
+    }
+    .tab-item.active { color: var(--coral); }
+    .tab-icon { font-size:20px; line-height:1; }
+    .tab-label { font-size:10px; }
+
+    /* ===== 详情弹窗 ===== */
+    .modal-overlay {
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.4);
+      z-index:1000;
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.show { display:flex; animation: fadeIn .2s; }
+    .modal {
+      background:var(--white);
+      border-radius: var(--radius) var(--radius) 0 0;
+      width:100%;
+      max-width:480px;
+      max-height:85vh;
+      overflow-y:auto;
+      padding:20px 20px calc(20px + var(--safe-b));
+      animation: slideUp .3s ease;
+    }
+    @keyframes slideUp { from{transform:translateY(100%);} to{transform:translateY(0);} }
+    .modal-handle {
+      width:36px; height:4px;
+      background:#DDD;
+      border-radius:2px;
+      margin:0 auto 16px;
+    }
+    .modal-close {
+      position:absolute;
+      right:16px; top:16px;
+      font-size:22px;
+      color: var(--ink-faint);
+      cursor:pointer;
+      z-index:1;
+    }
+
+    /* 评分明细 */
+    .score-detail-row {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:10px 0;
+      border-bottom:1px solid #F5F5F5;
+    }
+    .score-detail-label { font-size:13px; color: var(--ink-light); }
+    .score-detail-val { font-size:15px; font-weight:700; color: var(--coral); }
+
+    /* 三才五格明细 */
+    .wuge-grid {
+      display:grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap:8px;
+      margin-top:10px;
+    }
+    .wuge-item {
+      background: var(--cream);
+      border-radius: var(--radius-sm);
+      padding:10px;
+      text-align:center;
+    }
+    .wuge-name { font-size:11px; color: var(--ink-faint); }
+    .wuge-val { font-size:18px; font-weight:700; color: var(--ink); margin:2px 0; }
+    .wuge-luck { font-size:11px; font-weight:600; }
+    .wuge-luck.吉 { color: #5a7a4a; }
+    .wuge-luck.大吉 { color: #3a8a2a; }
+    .wuge-luck.凶 { color: var(--coral); }
+
+    /* ===== 工具类 ===== */
+    .text-center { text-align:center; }
+    .text-coral { color: var(--coral); }
+    .text-gold { color: var(--gold); }
+    .text-sm { font-size:12px; }
+    .text-muted { color: var(--ink-light); }
+    .mt-8 { margin-top:8px; }
+    .mt-16 { margin-top:16px; }
+    .mb-8 { margin-bottom:8px; }
+    .mb-16 { margin-bottom:16px; }
+    .hidden { display:none !important; }
+
+    /* 免责声明 */
+    .disclaimer {
+      font-size:11px;
+      color: var(--ink-faint);
+      text-align:center;
+      padding:16px 20px;
+      line-height:1.8;
+    }
+
+    /* 加载动画 */
+    .loading-spinner {
+      text-align:center;
+      padding:40px;
+      color: var(--coral);
+    }
+    .spinner {
+      width:36px; height:36px;
+      border:3px solid var(--coral-pale);
+      border-top-color: var(--coral);
+      border-radius:50%;
+      margin:0 auto 12px;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* 滚动容器 */
+    .scroll-area {
+      overflow-y:auto;
+      -webkit-overflow-scrolling:touch;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== 首页 ===== -->
+  <div class="page active" id="page-home">
+    <div class="header">
+      <div class="header-inner">
+        <div>
+          <div class="header-title">新生儿取名工作台</div>
+          <div class="header-sub">八字五行 · 三才五格 · 生肖喜忌</div>
+        </div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="hero">
+        <div class="hero-title">赐子千金</div>
+        <div class="hero-title" style="font-size:20px; margin-top:4px;">不如教子一艺</div>
+        <div class="hero-sub">赐子一艺，不如赐子好名</div>
+        <div class="hero-badge">新生儿取名 · 传统文化</div>
+      </div>
+
+      <!-- 每日荐名 -->
+      <div class="card">
+        <div class="card-title">每日荐名</div>
+        <div class="daily-name" id="dailyName">
+          <div class="daily-name-chars" id="dailyChars">—</div>
+          <div class="daily-name-py" id="dailyPinyin"></div>
+          <div class="daily-name-mean" id="dailyMean"></div>
+        </div>
+        <div class="text-center">
+          <button class="daily-refresh" onclick="App.refreshDaily()">换一个</button>
+        </div>
+      </div>
+
+      <!-- 快捷入口 -->
+      <div class="card">
+        <div class="card-title">功能导航</div>
+        <div class="quick-grid">
+          <div class="quick-item" onclick="App.go('name')">
+            <div class="quick-icon">📝</div>
+            <div class="quick-label">开始取名</div>
+          </div>
+          <div class="quick-item" onclick="App.go('name');App.startNameFlow()">
+            <div class="quick-icon">☯️</div>
+            <div class="quick-label">八字排盘</div>
+          </div>
+          <div class="quick-item" onclick="App.go('favorites')">
+            <div class="quick-icon">⭐</div>
+            <div class="quick-label">我的收藏</div>
+          </div>
+          <div class="quick-item" onclick="App.go('knowledge');App.showKnowledge('dict')">
+            <div class="quick-icon">📖</div>
+            <div class="quick-label">汉字查询</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="disclaimer">
+        本应用命理分析内容基于中国传统文化<br>仅供参考娱乐，不构成任何决策依据
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 取名页 ===== -->
+  <div class="page" id="page-name">
+    <div class="header">
+      <div class="header-inner">
+        <div>
+          <div class="header-title">取名工作流</div>
+          <div class="header-sub">录入信息 → 八字分析 → 名字推荐</div>
+        </div>
+      </div>
+    </div>
+    <div class="content">
+      <!-- 步骤条 -->
+      <div class="steps">
+        <div class="step active" id="step1"><div class="step-num">1</div>录入信息</div>
+        <div class="step" id="step2"><div class="step-num">2</div>八字分析</div>
+        <div class="step" id="step3"><div class="step-num">3</div>名字推荐</div>
+      </div>
+
+      <!-- Step 1: 信息录入 -->
+      <div id="name-step1">
+        <div class="card">
+          <div class="card-title">宝宝信息</div>
+          <div class="form-group">
+            <label class="form-label">姓氏 <span class="req">*</span></label>
+            <input type="text" class="form-input" id="inputSurname" placeholder="如：詹、欧阳" value="詹" maxlength="4">
+          </div>
+          <div class="form-group">
+            <label class="form-label">性别 <span class="req">*</span></label>
+            <div class="gender-toggle">
+              <div class="gender-btn active" onclick="App.selectGender(this,'男')">男宝宝</div>
+              <div class="gender-btn" onclick="App.selectGender(this,'女')">女宝宝</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">出生日期 <span class="req">*</span></label>
+            <input type="date" class="form-input" id="inputDate" min="2020-01-01" max="2027-12-31">
+          </div>
+          <div class="form-group">
+            <label class="form-label">出生时间 <span class="req">*</span></label>
+            <input type="time" class="form-input" id="inputTime" onchange="App.updateShichen()">
+            <div class="shichen-hint" id="shichenHint"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">家族避讳（可选）</label>
+            <input type="text" class="form-input" id="inputAvoid" placeholder="需避开的字，如：父名、祖名">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="App.proceedToStep2()">排八字 →</button>
+      </div>
+
+      <!-- Step 2: 八字分析 -->
+      <div id="name-step2" class="hidden">
+        <div class="card">
+          <div class="card-title">生辰八字</div>
+          <div class="bazi-pillars" id="baziPillars"></div>
+          <div class="mt-16 text-center">
+            <div class="text-sm text-muted" id="baziDate"></div>
+            <div class="text-sm text-gold mt-8" id="baziLunar"></div>
+            <div class="text-sm text-coral mt-8" id="baziZodiac"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">五行力量分布</div>
+          <svg class="wuxing-chart" id="wuxingRadar" viewBox="0 0 280 260"></svg>
+          <div class="wuxing-bars" id="wuxingBars"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">喜用神建议</div>
+          <div class="text-sm text-muted mb-8" id="dayMasterText"></div>
+          <div class="favorable-tags" id="favorableTags"></div>
+          <div class="text-sm text-muted mt-8" id="favorableDesc"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">生肖取名宜忌</div>
+          <div id="zodiacPrefs"></div>
+        </div>
+
+        <button class="btn btn-primary" onclick="App.proceedToStep3()">生成名字 →</button>
+        <div style="height:8px"></div>
+        <button class="btn btn-ghost" onclick="App.backToStep1()">← 返回修改</button>
+      </div>
+
+      <!-- Step 3: 名字推荐 -->
+      <div id="name-step3" class="hidden">
+        <div class="mode-tabs" id="modeTabs">
+          <div class="mode-tab active" onclick="App.selectMode(this,'bazi')">八字补益</div>
+          <div class="mode-tab" onclick="App.selectMode(this,'poetry')">诗经楚辞</div>
+          <div class="mode-tab" onclick="App.selectMode(this,'classics')">成语典故</div>
+          <div class="mode-tab" onclick="App.selectMode(this,'custom')">自定义</div>
+        </div>
+
+        <div id="customInput" class="hidden mb-16">
+          <div class="card">
+            <div class="card-title">自定义寓意</div>
+            <input type="text" class="form-input" id="customKeyword" placeholder="如：光明、智慧、温润">
+            <button class="btn btn-outline mt-8" onclick="App.regenerate()">搜索推荐</button>
+          </div>
+        </div>
+
+        <div id="nameResults"></div>
+
+        <div class="text-center">
+          <button class="btn btn-ghost" onclick="App.regenerate()" style="max-width:200px;margin:0 auto;">换一批</button>
+        </div>
+        <div style="height:8px"></div>
+        <button class="btn btn-ghost" onclick="App.backToStep2()">← 返回八字</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 收藏页 ===== -->
+  <div class="page" id="page-favorites">
+    <div class="header">
+      <div class="header-inner">
+        <div>
+          <div class="header-title">我的收藏</div>
+          <div class="header-sub" id="favCount">收藏 0 个名字</div>
+        </div>
+      </div>
+    </div>
+    <div class="content">
+      <div id="favList"></div>
+      <div id="favEmpty" class="empty-state">
+        <div class="empty-state-icon">⭐</div>
+        <div class="empty-state-text">还没有收藏名字<br>去取名页面发现好名字吧</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 知识页 ===== -->
+  <div class="page" id="page-knowledge">
+    <div class="header">
+      <div class="header-inner">
+        <div>
+          <div class="header-title">取名知识库</div>
+          <div class="header-sub">传统文化 · 寓意解读</div>
+        </div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="card">
+        <div class="card-title">汉字查询</div>
+        <div class="form-row">
+          <input type="text" class="form-input" id="charQuery" placeholder="输入单个汉字查询" maxlength="1">
+          <button class="btn btn-outline" style="max-width:80px;" onclick="App.queryChar()">查</button>
+        </div>
+        <div id="charResult"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">取名知识</div>
+        <div class="knowledge-item" onclick="App.showArticle('bazi')">
+          <div class="knowledge-item-title">生辰八字入门</div>
+          <div class="knowledge-item-desc">天干地支、四柱排盘基础</div>
+        </div>
+        <div class="knowledge-item" onclick="App.showArticle('wuxing')">
+          <div class="knowledge-item-title">五行相生相克</div>
+          <div class="knowledge-item-desc">金木水火土的生克关系</div>
+        </div>
+        <div class="knowledge-item" onclick="App.showArticle('sanCai')">
+          <div class="knowledge-item-title">三才五格原理</div>
+          <div class="knowledge-item-desc">天格、人格、地格的吉凶判断</div>
+        </div>
+        <div class="knowledge-item" onclick="App.showArticle('zodiac')">
+          <div class="knowledge-item-title">生肖取名讲究</div>
+          <div class="knowledge-item-desc">十二生肖的喜忌字根</div>
+        </div>
+        <div class="knowledge-item" onclick="App.showArticle('strokes')">
+          <div class="knowledge-item-title">康熙笔画的重要性</div>
+          <div class="knowledge-item-desc">为什么取名要用康熙字典笔画</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 我的页 ===== -->
+  <div class="page" id="page-profile">
+    <div class="header">
+      <div class="header-inner">
+        <div>
+          <div class="header-title">关于</div>
+          <div class="header-sub">新生儿取名工作台 v1.0</div>
+        </div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="card text-center">
+        <img src="apple-touch-icon.png" style="width:80px;height:80px;border-radius:20px;margin:0 auto 12px;display:block;" alt="icon">
+        <div style="font-size:18px;font-weight:700;color:var(--coral);">取名工作台</div>
+        <div class="text-sm text-muted mt-8">融合中国传统命理文化的取名服务</div>
+        <div class="text-sm text-muted">八字五行 · 三才五格 · 生肖喜忌</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">功能特性</div>
+        <div class="text-sm text-muted" style="line-height:2;">
+          ✓ 公历转农历，精确时辰排八字<br>
+          ✓ 五行力量分析，喜用神推荐<br>
+          ✓ 三才五格康熙笔画计算<br>
+          ✓ 十二生肖喜忌字根过滤<br>
+          ✓ 诗经楚辞、成语典故取名<br>
+          ✓ 汉字五行属性查询<br>
+          ✓ 纯前端离线运行，隐私安全
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">数据隐私</div>
+        <div class="text-sm text-muted" style="line-height:1.8;">
+          本应用为纯前端应用，所有数据（出生日期、姓名等）仅存储在您的设备浏览器中，不会上传至任何服务器。支持离线使用，无需注册。
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">操作</div>
+        <button class="btn btn-outline mb-8" onclick="App.clearFavorites()">清空收藏</button>
+        <button class="btn btn-outline" onclick="App.clearCache()">清除缓存</button>
+      </div>
+
+      <div class="disclaimer">
+        本应用命理分析内容基于中国传统文化<br>仅供参考娱乐，不构成任何决策依据
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Tab Bar ===== -->
+  <div class="tab-bar">
+    <div class="tab-item active" onclick="App.go('home')">
+      <div class="tab-icon">🏠</div>
+      <div class="tab-label">首页</div>
+    </div>
+    <div class="tab-item" onclick="App.go('name')">
+      <div class="tab-icon">✍️</div>
+      <div class="tab-label">取名</div>
+    </div>
+    <div class="tab-item" onclick="App.go('favorites')">
+      <div class="tab-icon">⭐</div>
+      <div class="tab-label">收藏</div>
+    </div>
+    <div class="tab-item" onclick="App.go('knowledge')">
+      <div class="tab-icon">📖</div>
+      <div class="tab-label">知识</div>
+    </div>
+    <div class="tab-item" onclick="App.go('profile')">
+      <div class="tab-icon">👤</div>
+      <div class="tab-label">我的</div>
+    </div>
+  </div>
+
+  <!-- ===== 详情弹窗 ===== -->
+  <div class="modal-overlay" id="modalOverlay" onclick="App.closeModal(event)">
+    <div class="modal" id="modalContent"></div>
+  </div>
+
+</div>
+
+<script src="data.js"></script>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(function(e){ console.log('SW register failed:', e); });
+}
+</script>
+</body>
+</html>
