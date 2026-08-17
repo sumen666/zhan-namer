@@ -14,6 +14,7 @@ const App = (function() {
     nameMode: 'bazi',
     nameResults: [],
     favorites: [],
+    compareList: [],
     currentBaziDate: null,
     currentBaziTime: null,
   };
@@ -29,8 +30,10 @@ const App = (function() {
 
   function setDefaultDate() {
     const today = new Date();
-    const dateStr = today.toISOString().split('T')[0];
-    document.getElementById('inputDate').value = dateStr;
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    document.getElementById('inputDate').value = `${y}-${m}-${d}`;
     document.getElementById('inputTime').value = '12:00';
   }
 
@@ -63,12 +66,13 @@ const App = (function() {
   }
 
   function refreshDaily() {
-    const pool = NAME_CHARS.filter(c => !['忠','孝','廉'].includes(c.ch));
+    const pool = NAME_CHARS.filter(c => c.ch !== '詹' && !['忠','孝','廉'].includes(c.ch));
     const c1 = pool[Math.floor(Math.random() * pool.length)];
     let c2 = pool[Math.floor(Math.random() * pool.length)];
     while (c2.ch === c1.ch) c2 = pool[Math.floor(Math.random() * pool.length)];
 
     const data = {
+      surname: '詹',
       chars: c1.ch + c2.ch,
       pinyin: c1.py + ' ' + c2.py,
       mean1: c1.mean,
@@ -81,7 +85,9 @@ const App = (function() {
   }
 
   function showDailyName(data) {
-    document.getElementById('dailyChars').textContent = data.chars;
+    const fullChars = (data.surname || '詹') + data.chars;
+    document.getElementById('dailyChars').innerHTML =
+      '<span style="color:var(--coral)">' + (data.surname || '詹') + '</span>' + data.chars;
     document.getElementById('dailyPinyin').textContent = data.pinyin;
     document.getElementById('dailyMean').innerHTML =
       data.mean1 + '<br>' + data.mean2 +
@@ -372,9 +378,11 @@ const App = (function() {
   function renderNameCards() {
     const container = document.getElementById('nameResults');
     const favNames = new Set(state.favorites.map(f => f.fullName));
+    const compareNames = new Set(state.compareList.map(c => c.fullName));
 
     container.innerHTML = state.nameResults.map((item, idx) => {
       const isFav = favNames.has(item.fullName);
+      const inCompare = compareNames.has(item.fullName);
       const score = item.score;
       const scoreColor = score.total >= 80 ? 'var(--coral)' : score.total >= 65 ? 'var(--gold)' : 'var(--ink-light)';
 
@@ -416,6 +424,10 @@ const App = (function() {
             ${isFav ? '★ 已收藏' : '☆ 收藏'}
           </div>
           <div class="name-action-btn" onclick="App.showDetail(${idx})">详情</div>
+          <div class="name-action-btn" onclick="App.shareName(${idx})">分享</div>
+          <div class="name-action-btn ${inCompare ? 'fav-active' : ''}" onclick="App.toggleCompare(${idx})">
+            ${inCompare ? '✓ 对比' : '对比'}
+          </div>
         </div>
       </div>`;
     }).join('');
@@ -779,13 +791,169 @@ const App = (function() {
     location.reload();
   }
 
+  /* ===== 分享名字 ===== */
+  function shareName(idx) {
+    const item = state.nameResults[idx];
+    if (!item) return;
+    const s = item.score;
+    const scwg = s.sanCaiWuGe;
+
+    const text = `${item.fullName}\n` +
+      `综合评分：${s.total}分\n` +
+      `八字契合：${s.baziScore} | 生肖契合：${s.zodiacScore}\n` +
+      `三才：${scwg.sanCaiKey}（${scwg.sanCai.luck}）\n` +
+      `总格：${scwg.zongGe}（${scwg.zongLuck.luck}）\n` +
+      `用字：${item.chars.map(c => c.ch+'('+c.wx+')').join(' ')}\n` +
+      `${item.source ? '出处：'+item.source : ''}`;
+
+    if (navigator.share) {
+      navigator.share({ title: item.fullName + ' - 取名分析', text: text })
+        .catch(() => copyToClipboard(text, '名字详情已复制'));
+    } else {
+      copyToClipboard(text, '名字详情已复制');
+    }
+  }
+
+  function copyToClipboard(text, msg) {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        if (msg) alert(msg);
+      }).catch(() => fallbackCopy(text, msg));
+    } else {
+      fallbackCopy(text, msg);
+    }
+  }
+
+  function fallbackCopy(text, msg) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); if (msg) alert(msg); } catch(e) {}
+    document.body.removeChild(ta);
+  }
+
+  /* ===== 名字对比 ===== */
+  function toggleCompare(idx) {
+    const item = state.nameResults[idx];
+    if (!item) return;
+    const existing = state.compareList.findIndex(c => c.fullName === item.fullName);
+    if (existing >= 0) {
+      state.compareList.splice(existing, 1);
+    } else {
+      if (state.compareList.length >= 4) {
+        alert('最多对比4个名字，请先取消已有的对比');
+        return;
+      }
+      state.compareList.push({
+        surname: item.surname,
+        name: item.name,
+        fullName: item.fullName,
+        chars: item.chars,
+        score: item.score
+      });
+    }
+    renderNameCards();
+    updateCompareBar();
+  }
+
+  function updateCompareBar() {
+    let bar = document.getElementById('compareBar');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'compareBar';
+      bar.className = 'compare-bar';
+      document.getElementById('name-step3').appendChild(bar);
+    }
+
+    if (state.compareList.length < 2) {
+      bar.style.display = 'none';
+      return;
+    }
+
+    bar.style.display = 'flex';
+    bar.innerHTML = `
+      <span style="font-size:13px;">已选 ${state.compareList.length} 个</span>
+      <button class="btn btn-primary" style="padding:8px 20px;font-size:13px;max-width:none;" onclick="App.showCompare()">开始对比</button>
+      <button class="btn btn-ghost" style="padding:8px 16px;font-size:13px;max-width:none;" onclick="App.clearCompare()">清空</button>
+    `;
+  }
+
+  function clearCompare() {
+    state.compareList = [];
+    renderNameCards();
+    updateCompareBar();
+  }
+
+  function showCompare() {
+    if (state.compareList.length < 2) return;
+
+    const items = state.compareList;
+    let html = '<div class="modal-handle"></div>';
+    html += '<div style="font-size:20px;font-weight:700;color:var(--coral);margin-bottom:16px;">名字对比</div>';
+
+    html += '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;"><table class="compare-table"><thead><tr><th>名字</th>';
+    items.forEach(it => {
+      html += `<th><span style="font-size:18px;font-weight:700;font-family:'STKaiti','KaiTi',serif;">${it.fullName}</span></th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    const rows = [
+      { label: '综合评分', get: it => it.score.total },
+      { label: '八字契合', get: it => it.score.baziScore },
+      { label: '数理吉凶', get: it => it.score.geScore },
+      { label: '三才吉凶', get: it => it.score.sancaiScore },
+      { label: '生肖契合', get: it => it.score.zodiacScore },
+      { label: '天格', get: it => it.score.sanCaiWuGe.tianGe + '(' + it.score.sanCaiWuGe.tianLuck.luck + ')' },
+      { label: '人格', get: it => it.score.sanCaiWuGe.renGe + '(' + it.score.sanCaiWuGe.renLuck.luck + ')' },
+      { label: '地格', get: it => it.score.sanCaiWuGe.diGe + '(' + it.score.sanCaiWuGe.diLuck.luck + ')' },
+      { label: '总格', get: it => it.score.sanCaiWuGe.zongGe + '(' + it.score.sanCaiWuGe.zongLuck.luck + ')' },
+      { label: '三才五行', get: it => it.score.sanCaiWuGe.sanCaiKey + '(' + it.score.sanCaiWuGe.sanCai.luck + ')' },
+      { label: '用字五行', get: it => it.score.charWuxingList.join('/') },
+      { label: '寓意', get: it => it.chars.map(c => c.mean.split(',')[0]).join('；') },
+    ];
+
+    rows.forEach(row => {
+      html += `<tr><td style="font-weight:600;color:var(--coral);text-align:right;">${row.label}</td>`;
+      const vals = items.map(it => row.get(it));
+      const maxVal = Math.max(...vals.filter(v => typeof v === 'number'));
+      items.forEach((it, i) => {
+        const val = vals[i];
+        const isMax = typeof val === 'number' && val === maxVal && maxVal > 0;
+        html += `<td style="${isMax ? 'color:var(--coral);font-weight:700;' : ''}">${val}</td>`;
+      });
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+    html += '<div class="disclaimer">命理分析仅供参考娱乐</div>';
+
+    document.getElementById('modalContent').innerHTML = html;
+    document.getElementById('modalOverlay').classList.add('show');
+  }
+
+  /* ===== 导出收藏 ===== */
+  function exportFavorites() {
+    if (state.favorites.length === 0) { alert('收藏夹为空'); return; }
+    const lines = state.favorites.map(f =>
+      `${f.fullName}（${f.score}分）` +
+      `${f.chars.map(c => c.ch+'('+c.wx+')').join(' ')}` +
+      `${f.source ? ' ['+f.source+']' : ''}`
+    );
+    const text = '取名工作台 - 收藏列表\n\n' + lines.join('\n');
+    copyToClipboard(text, '收藏列表已复制到剪贴板');
+  }
+
   /* ===== 公开接口 ===== */
   return {
     init, go, refreshDaily, updateShichen, selectGender,
     proceedToStep2, backToStep1, proceedToStep3, backToStep2,
     selectMode, regenerate, showDetail, closeModal,
     toggleFav, removeFav, clearFavorites, renderFavorites,
-    queryChar, showArticle, showKnowledge, startNameFlow, clearCache
+    queryChar, showArticle, showKnowledge, startNameFlow, clearCache,
+    shareName, toggleCompare, clearCompare, showCompare, exportFavorites
   };
 })();
 
