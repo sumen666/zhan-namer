@@ -79,20 +79,23 @@
       color: #fff;
     }
     .header-inner {
-      padding: 12px 20px 16px;
+      padding: 14px 20px 18px;
       display:flex;
       align-items:center;
       justify-content:space-between;
+      gap: 12px;
     }
     .header-title {
       font-size: 18px;
       font-weight: 700;
       letter-spacing: 1px;
+      line-height: 1.4;
     }
     .header-sub {
       font-size: 11px;
       opacity:.75;
-      margin-top:2px;
+      margin-top:4px;
+      line-height: 1.4;
     }
 
     /* ===== 内容区 ===== */
@@ -944,11 +947,11 @@
   <div class="page" id="page-favorites">
     <div class="header">
       <div class="header-inner">
-        <div>
+        <div style="flex:1;min-width:0;">
           <div class="header-title">我的收藏</div>
           <div class="header-sub" id="favCount">收藏 0 个名字</div>
         </div>
-        <button class="btn btn-outline" style="padding:6px 14px;font-size:12px;max-width:none;" onclick="App.exportFavorites()">导出</button>
+        <button class="btn btn-outline" style="padding:6px 14px;font-size:12px;max-width:none;flex-shrink:0;" onclick="App.exportFavorites()">导出</button>
       </div>
     </div>
     <div class="content">
