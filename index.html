@@ -644,6 +644,7 @@
       backdrop-filter: blur(4px);
     }
     .modal-overlay.show { display:flex; animation: fadeIn .2s; }
+    .modal-wrap { position:relative; width:100%; max-width:480px; }
     .modal {
       background:var(--white);
       border-radius: var(--radius) var(--radius) 0 0;
@@ -1081,7 +1082,10 @@
 
   <!-- ===== 详情弹窗 ===== -->
   <div class="modal-overlay" id="modalOverlay" onclick="App.closeModal(event)">
-    <div class="modal" id="modalContent"></div>
+    <div class="modal-wrap">
+      <span class="modal-close" onclick="App.closeModal(event)">&times;</span>
+      <div class="modal" id="modalContent"></div>
+    </div>
   </div>
 
 </div>
