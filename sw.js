@@ -1,7 +1,7 @@
 /* Service Worker - 新生儿取名工作台 */
 /* 纯前端离线应用，首次加载后完全离线可用 */
 
-const CACHE_VERSION = 'v4-20260818';
+const CACHE_VERSION = 'v5-20260818';
 const CACHE_NAME = 'babynamer-' + CACHE_VERSION;
 const ASSETS = [
   './',
