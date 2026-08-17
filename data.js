@@ -300,12 +300,12 @@ const NAME_CHARS = [
   /* ——— 温润类 ——— */
   {ch:'润',py:'rùn',ss:10,ks:16,wx:'水',mean:'润泽,温润,温润如玉',src:''},
   {ch:'泽',py:'zé',ss:8,ks:17,wx:'水',mean:'恩泽,光泽,泽被苍生',src:'《尚书》:道洽政治,泽润生民'},
-  {ch:'清',py:'qīng',ss:11,ks:12,wx:'水',mean:'清澈,清雅,清正廉洁',src:''},
+  {ch:'清',py:'qīng',ss:11,ks:12,wx:'水',mean:'清雅,清廉,清正廉洁',src:''},
   {ch:'涵',py:'hán',ss:11,ks:12,wx:'水',mean:'涵养,包容,涵蓄大度',src:''},
   {ch:'潇',py:'xiāo',ss:15,ks:20,wx:'水',mean:'潇洒,风流,潇洒自如',src:''},
   {ch:'溪',py:'xī',ss:13,ks:14,wx:'水',mean:'溪水,清澈,溪水长流',src:''},
   {ch:'沛',py:'pèi',ss:7,ks:8,wx:'水',mean:'充盛,丰沛,精力充沛',src:''},
-  {ch:'源',py:'yuán',ss:13,ks:14,wx:'水',mean:'源头,源远,源远流长',src:''},
+  {ch:'源',py:'yuán',ss:13,ks:14,wx:'水',mean:'源头,源流,饮水思源',src:''},
   {ch:'浩',py:'hào',ss:10,ks:11,wx:'水',mean:'浩大,广阔,浩然正气',src:'孟子:吾善养吾浩然之气'},
   {ch:'瀚',py:'hàn',ss:19,ks:20,wx:'水',mean:'广大,浩瀚,浩瀚无垠',src:''},
   {ch:'渊',py:'yuān',ss:11,ks:12,wx:'水',mean:'深渊,渊博,学识渊博',src:''},
@@ -384,7 +384,7 @@ const NAME_CHARS = [
   {ch:'乐',py:'lè',ss:5,ks:15,wx:'火',mean:'快乐,安乐,乐天知命',src:''},
   {ch:'怡',py:'yí',ss:8,ks:9,wx:'土',mean:'愉快,和悦,心旷神怡',src:''},
   {ch:'恬',py:'tián',ss:9,ks:10,wx:'火',mean:'恬静,安恬,恬淡寡欲',src:''},
-  {ch:'舒',py:'shū',ss:12,ks:12,wx:'金',mean:'舒展,从容,舒心惬意',src:''},
+
 
   /* ——— 端庄典雅类 ——— */
   {ch:'静',py:'jìng',ss:14,ks:16,wx:'金',mean:'宁静,沉静,静以修身',src:'诸葛亮:静以修身,俭以养德'},
@@ -394,7 +394,6 @@ const NAME_CHARS = [
   {ch:'仪',py:'yí',ss:5,ks:15,wx:'木',mean:'仪态,礼仪,仪态万方',src:''},
   {ch:'方',py:'fāng',ss:4,ks:4,wx:'水',mean:'方正,方正,方正不阿',src:''},
   {ch:'正',py:'zhèng',ss:5,ks:5,wx:'金',mean:'端正,正大,光明正大',src:''},
-  {ch:'清',py:'qīng',ss:11,ks:12,wx:'水',mean:'清雅,清廉,清正廉洁',src:''},
 
   /* ——— 更多常用字 ——— */
   {ch:'宇',py:'yǔ',ss:6,ks:6,wx:'土',mean:'宇宙,气宇,气宇轩昂',src:''},
@@ -417,7 +416,7 @@ const NAME_CHARS = [
   {ch:'惠',py:'huì',ss:12,ks:12,wx:'水',mean:'恩惠,仁慈,惠泽深厚',src:''},
   {ch:'慈',py:'cí',ss:13,ks:14,wx:'金',mean:'慈爱,善良,慈悲为怀',src:''},
   {ch:'舒',py:'shū',ss:12,ks:12,wx:'金',mean:'舒展,从容,云卷云舒',src:''},
-  {ch:'宁',py:'níng',ss:5,ks:14,wx:'火',mean:'安宁,宁静,宁静致远',src:''},
+
   {ch:'锦',py:'jǐn',ss:13,ks:16,wx:'金',mean:'锦绣,华美,前程似锦',src:''},
   {ch:'绣',py:'xiù',ss:10,ks:13,wx:'金',mean:'锦绣,精美,锦绣前程',src:''},
   {ch:'蕾',py:'lěi',ss:16,ks:17,wx:'木',mean:'花蕾,含苞,含苞待放',src:''},
@@ -427,12 +426,11 @@ const NAME_CHARS = [
   {ch:'栩',py:'xǔ',ss:10,ks:10,wx:'木',mean:'生动,栩栩,栩栩如生',src:''},
   {ch:'霖',py:'lín',ss:16,ks:16,wx:'水',mean:'甘霖,恩泽,沛雨甘霖',src:''},
   {ch:'淼',py:'miǎo',ss:12,ks:12,wx:'水',mean:'水大,浩淼,烟波浩淼',src:''},
-  {ch:'源',py:'yuán',ss:13,ks:14,wx:'水',mean:'源头,源流,饮水思源',src:''},
   {ch:'淳',py:'chún',ss:11,ks:12,wx:'水',mean:'淳朴,敦厚,返璞归淳',src:''},
   {ch:'灏',py:'hào',ss:21,ks:25,wx:'水',mean:'广大,灏瀚,灏气充弥',src:''},
   {ch:'珩',py:'héng',ss:10,ks:11,wx:'水',mean:'玉佩,珍贵,珩玉之德',src:''},
   {ch:'禹',py:'yǔ',ss:9,ks:9,wx:'土',mean:'大禹,贤明,大禹治水',src:''},
-  {ch:'舒',py:'shū',ss:12,ks:12,wx:'金',mean:'舒展,从容,舒展自如',src:''},
+
   {ch:'晗',py:'hán',ss:11,ks:11,wx:'火',mean:'天将明,晨曦,晗光初现',src:''},
   {ch:'晔',py:'yè',ss:10,ks:16,wx:'火',mean:'光明,盛美,晔晔光明',src:''},
   {ch:'晏',py:'yàn',ss:10,ks:10,wx:'火',mean:'平静,温和,海晏河清',src:''},
@@ -447,13 +445,12 @@ const NAME_CHARS = [
   {ch:'湘',py:'xiāng',ss:12,ks:13,wx:'水',mean:'湘江,灵动,湘江秋月',src:''},
   {ch:'沂',py:'yí',ss:7,ks:8,wx:'水',mean:'沂水,清雅,沂水春风',src:'《论语》:浴乎沂,风乎舞雩'},
   {ch:'澄',py:'chéng',ss:15,ks:16,wx:'水',mean:'清澈,澄明,澄心明志',src:''},
-  {ch:'淳',py:'chún',ss:11,ks:12,wx:'水',mean:'淳厚,朴实,淳厚质朴',src:''},
-  {ch:'淳',py:'chún',ss:11,ks:12,wx:'水',mean:'淳厚,质朴,淳风美俗',src:''},
+
   {ch:'蓓',py:'bèi',ss:16,ks:17,wx:'木',mean:'蓓蕾,含苞,蓓蕾初开',src:''},
   {ch:'蔓',py:'màn',ss:14,ks:17,wx:'木',mean:'蔓草,绵延,蔓草连天',src:'《诗经》:野有蔓草,零露漙兮'},
   {ch:'芷',py:'zhǐ',ss:7,ks:7,wx:'木',mean:'白芷,香草,沅芷澧兰',src:'《楚辞》:沅有芷兮澧有兰'},
   {ch:'若',py:'ruò',ss:8,ks:11,wx:'木',mean:'如,好像,虚怀若谷',src:'《道德经》:上善若水'},
-  {ch:'兰',py:'lán',ss:5,ks:23,wx:'木',mean:'兰草,高雅,兰质蕙心',src:''},
+
   {ch:'薇',py:'wēi',ss:16,ks:19,wx:'木',mean:'蔷薇,芬芳,采薇采薇',src:'《诗经》:采薇采薇,薇亦作止'},
   {ch:'苓',py:'líng',ss:8,ks:11,wx:'木',mean:'茯苓,草药,苓草芳馨',src:''},
   {ch:'荀',py:'xún',ss:9,ks:12,wx:'木',mean:'荀草,美好,荀草芳香',src:''},
