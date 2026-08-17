@@ -5,6 +5,16 @@
 
 const Engine = (function() {
 
+  /* ============ 工具: Fisher-Yates 随机打乱 ============ */
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
   /* ============ 八字排盘 ============ */
 
   /* 获取节气日期 (返回 {month, day}) */
@@ -494,6 +504,9 @@ const Engine = (function() {
       return zc.avoid.length === 0;
     });
 
+    // 随机打乱字符池，使每次生成结果不同
+    pool = shuffle(pool);
+
     // 生成双字名和单字名
     const results = [];
     const used = new Set();
@@ -548,11 +561,11 @@ const Engine = (function() {
     const results = [];
     const used = new Set();
 
-    for (const poem of POETRY) {
+    for (const poem of shuffle(POETRY)) {
       // 从诗句中提取可用字
       const chars = poem.kw || [];
       // 筛选在汉字库中的字
-      const validChars = chars.filter(ch => NAME_CHARS.find(c => c.ch === ch));
+      const validChars = shuffle(chars.filter(ch => NAME_CHARS.find(c => c.ch === ch)));
 
       // 双字组合
       for (let i = 0; i < validChars.length; i++) {
@@ -596,7 +609,7 @@ const Engine = (function() {
   /* 模式3: 成语典故模式 */
   function generateByClassics(surname, bazi, wuxingAnalysis, gender, count) {
     count = count || 20;
-    const idiomChars = NAME_CHARS.filter(c => c.src && c.src.length > 0);
+    const idiomChars = shuffle(NAME_CHARS.filter(c => c.src && c.src.length > 0));
     const results = [];
     const used = new Set();
 
@@ -646,6 +659,9 @@ const Engine = (function() {
       const zc = checkZodiacCompat(c.ch, bazi.zodiac);
       return zc.avoid.length === 0;
     });
+
+    // 随机打乱字符池
+    pool = shuffle(pool);
 
     const results = [];
     const used = new Set();
