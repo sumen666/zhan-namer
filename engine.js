@@ -57,16 +57,6 @@ const Engine = (function() {
     const allNodes = [...prevYearNodes, ...nodes].sort((a,b) => a.date - b.date);
 
     // 找到 <= date 的最后一个节点
-    let activeTerm = allNodes[0];
-    for (const node of allNodes) {
-      const cmp = new Date(year, node.date.getMonth(), node.date.getDate());
-      const cur = new Date(year, month - 1, day);
-      // 跨年比较: 直接用原始date比较
-      if (node.date <= date) {
-        activeTerm = node;
-      }
-    }
-    // 重新检查: 直接用实际日期比较
     let result = allNodes[0];
     for (const node of allNodes) {
       if (node.date <= date) {
@@ -489,11 +479,13 @@ const Engine = (function() {
     // 筛选喜用神五行的字
     let pool = NAME_CHARS.filter(c => targetWx.includes(c.wx));
 
-    // 性别过滤 (简化: 根据字的风格判断)
+    // 性别过滤
+    const femaleChars = ['婷','妍','媛','婉','淑','萱','薇','蓓','蕊','玲','珊','珍','娜','妮','娇','娴','嫣','嫦','娟','妤','绣','绣','莹','莹','芳','芝','芹','萍','琴','琼','瑗','瑛'];
+    const maleChars = ['刚','勇','猛','豪','鹏','鸿','瀚','浩','博','杰','伟','超','强','武','虎','彪','峰','军','凯','磊','震','霆','锋','剑','锐','钧','铁','鑫'];
     if (gender === '男') {
-      pool = pool.filter(c => !['婷','妍','媛','婉','淑','萱','薇','蓓','蕊','玲','珊','珍'].includes(c.ch));
+      pool = pool.filter(c => !femaleChars.includes(c.ch));
     } else if (gender === '女') {
-      pool = pool.filter(c => !['刚','勇','猛','豪','鹏','鸿','瀚','浩','博','杰','伟','超'].includes(c.ch));
+      pool = pool.filter(c => !maleChars.includes(c.ch));
     }
 
     // 生肖喜忌过滤
