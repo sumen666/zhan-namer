@@ -58,8 +58,10 @@ const App = (function() {
     if (stored) {
       try {
         const data = JSON.parse(stored);
-        showDailyName(data);
-        return;
+        if (data && data.chars && data.pinyin) {
+          showDailyName(data);
+          return;
+        }
       } catch(e) {}
     }
     refreshDaily();
@@ -129,7 +131,7 @@ const App = (function() {
 
     state.surname = surname;
     state.currentBaziDate = date;
-    state.currentBaziTime = hour;
+    state.currentBaziTime = timeStr;
 
     try {
       state.bazi = Engine.getBazi(date, hour, minute);
@@ -139,10 +141,15 @@ const App = (function() {
       return;
     }
 
-    renderBazi();
-    renderWuxing();
-    renderFavorable();
-    renderZodiacPrefs();
+    try {
+      renderBazi();
+      renderWuxing();
+      renderFavorable();
+      renderZodiacPrefs();
+    } catch(e) {
+      alert('信息渲染出错: ' + e.message);
+      return;
+    }
 
     document.getElementById('name-step1').classList.add('hidden');
     document.getElementById('name-step2').classList.remove('hidden');
@@ -175,7 +182,7 @@ const App = (function() {
 
     const date = state.currentBaziDate;
     document.getElementById('baziDate').textContent =
-      `公历：${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日 ${state.currentBaziTime}时`;
+      `公历：${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日 ${state.currentBaziTime}`;
 
     const lunar = Engine.solarToLunar(date.getFullYear(), date.getMonth()+1, date.getDate());
     document.getElementById('baziLunar').textContent = `农历：${lunar.display} ${lunar.ganzhi}年`;
@@ -440,12 +447,6 @@ const App = (function() {
     const s = item.score;
     const scwg = s.sanCaiWuGe;
 
-    const luckClass = (luck) => {
-      if (luck.includes('大吉')) return '大吉';
-      if (luck.includes('凶')) return '凶';
-      return '吉';
-    };
-
     let html = `
       <div class="modal-handle"></div>
       <div class="text-center mb-16">
@@ -530,7 +531,7 @@ const App = (function() {
   }
 
   function closeModal(e) {
-    if (e.target === document.getElementById('modalOverlay')) {
+    if (!e || e.target === document.getElementById('modalOverlay') || (e.target && e.target.classList.contains('modal-close'))) {
       document.getElementById('modalOverlay').classList.remove('show');
     }
   }
@@ -770,7 +771,14 @@ const App = (function() {
   }
 
   function startNameFlow() {
-    // 在取名页直接进入step1，但需要确保页面已显示
+    document.getElementById('name-step1').classList.remove('hidden');
+    document.getElementById('name-step2').classList.add('hidden');
+    document.getElementById('name-step3').classList.add('hidden');
+    document.getElementById('step1').classList.add('active');
+    document.getElementById('step1').classList.remove('done');
+    document.getElementById('step2').classList.remove('active','done');
+    document.getElementById('step3').classList.remove('active','done');
+    setDefaultDate();
   }
 
   /* ===== 缓存管理 ===== */
@@ -808,7 +816,11 @@ const App = (function() {
 
     if (navigator.share) {
       navigator.share({ title: item.fullName + ' - 取名分析', text: text })
-        .catch(() => copyToClipboard(text, '名字详情已复制'));
+        .catch((e) => {
+          if (e.name !== 'AbortError') {
+            copyToClipboard(text, '名字详情已复制');
+          }
+        });
     } else {
       copyToClipboard(text, '名字详情已复制');
     }
